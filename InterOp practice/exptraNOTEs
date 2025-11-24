@@ -1,0 +1,74 @@
+#include <stdio.h>
+
+int main() {
+    int src[5] = {1, 2, 3, 4, 5};
+    int dest[5] = {0};
+
+    for (int i = 0; i < 5; i++) {
+        dest[i] = src[i];  // copy each element
+    }
+
+    // Print destination array
+    for (int i = 0; i < 5; i++) {
+        printf("%d ", dest[i]);
+    }
+
+    return 0;
+}
+
+
+
+section .data
+    src  dd 1, 2, 3, 4, 5     ; source array
+    dest dd 0, 0, 0, 0, 0     ; destination array
+
+section .text
+global _start
+_start:
+    mov esi, src       ; ESI points to source array
+    mov edi, dest      ; EDI points to destination array
+    mov ecx, 5         ; number of elements to copy
+    cld                ; clear direction flag (forward copy)
+    
+rep_movsd:             ; label for loop
+    mov eax, [esi]    ; load dword from [ESI] into EAX
+    mov [edi], eax    ; store EAX into [EDI]
+    add esi, 4        ; move to next element (4 bytes)
+    add edi, 4        ; move to next element (4 bytes)
+    loop rep_movsd    ; decrement ECX, repeat if not zero
+
+    ; exit program (Linux syscall)
+    mov eax, 60       ; syscall number for exit
+    xor edi, edi      ; exit code 0
+    syscall
+
+
+
+
+mov esi, src
+mov edi, dest
+mov ecx, 5
+cld
+rep movsd       ; automatically copies ECX dwords from [ESI] → [EDI]
+; rep automatically decrements ECX until 0.
+
+; movsd moves 4 bytes at a time.
+
+; ESI and EDI are incremented automatically.
+
+
+
+
+
+
+
+int x = 10;
+int *p = &x;
+
+printf("%d\n", *(&x)); // prints 10
+printf("%d\n", &(*p) == p); // true (1)
+
+; &x → address of x
+; *p → value at the address stored in p
+; Using * on an address (&x) gets you back the value.
+; Using & on a dereferenced pointer (*p) gets you back the address.

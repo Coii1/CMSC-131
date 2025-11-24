@@ -1,0 +1,84 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "NASM Assemble (32-bit)",
+            "type": "shell",
+            "command": "nasm",
+            "args": [
+                "-f",
+                "win32",
+                "${file}",
+                "-o",
+                "${fileDirname}/${fileBasenameNoExtension}.obj"
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "group": "build"
+        },
+        {
+            "label": "GCC Compile Driver (32-bit)",
+            "type": "shell",
+            "command": "gcc",
+            "args": [
+                "-m32",
+                "-c",
+                "${fileDirname}/driver.c",
+                "-o",
+                "${fileDirname}/driver.o"
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "group": "build"
+        },
+        {
+            "label": "GCC Link (32-bit Console)",
+            "type": "shell",
+            "command": "gcc",
+            "args": [
+                "-m32",
+                "${fileDirname}/${fileBasenameNoExtension}.obj",
+                "${fileDirname}/asm_io.obj",
+                "${fileDirname}/driver.o",
+                "-o",
+                "${fileDirname}/${fileBasenameNoExtension}.exe",
+                "--%",
+                "-Wl,-subsystem,console"
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "group": "build",
+            "dependsOn": [
+                "NASM Assemble (32-bit)",
+                "GCC Compile Driver (32-bit)"
+            ]
+        },
+        {
+            "label": "Run Program",
+            "type": "shell",
+            "command": "${fileDirname}/${fileBasenameNoExtension}.exe",
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "group": "test"
+        },
+        {
+            "label": "Build & Run",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "GCC Link (32-bit Console)",
+                "Run Program"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+        }
+    ]
+}
