@@ -104,13 +104,13 @@ int main(void) {
     for (int gen = 0; gen < MAX_GEN; ++gen) {
         //system("cls"); /* use "clear" on Unix; on Windows "cls" */
         printf("Generation %d\n", gen);
-        if (gen % 2 == 0) {
-            cur = (int*)gridA;
-            next = (int*)gridB;
-        } else {
-            cur = (int*)gridB;
-            next = (int*)gridA;
-        }
+        // if (gen % 2 == 0) {
+        //     cur = (int*)gridA;
+        //     next = (int*)gridB;
+        // } else {
+        //     cur = (int*)gridB;
+        //     next = (int*)gridA;
+        // }
         print_grid(cur, ROWS, COLS);
         printf("\n-----------------------\n\n"); // separator
         step_once(cur, next, ROWS, COLS);

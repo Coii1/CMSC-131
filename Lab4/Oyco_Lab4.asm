@@ -2,6 +2,7 @@
 
 segment .text
     global _count_neighbors
+    global _copy_grid
 
 ; int count_neighbors(int *grid, int SIZE, int r, int c)
 _count_neighbors:
@@ -77,3 +78,63 @@ done:
     mov     eax, [ebp-4]      ; return sum
     leave
     ret
+
+
+_copy_grid:
+    ; void copy_grid(int *dest, int *src, int size)
+    ; [esp+4] = dest                  
+    ; [esp+8] = src
+    ; [esp+12] = size
+    ; need ipresever and esi, edi kay if inidi sila mabalik. ga runtime error
+    ;enter 0, 0                 ; no local variables
+    push    esi
+    push    edi
+    mov edi, [esp+12]  ; dest
+    mov esi, [esp+16]  ; src
+    mov ecx, [esp+20]  ; size
+    imul    ecx, ecx
+    cld
+    rep movsd
+    pop     edi
+    pop     esi
+    ;leave
+    ret
+    ;no need for stack frame since no local variables
+    
+
+
+; _copy_grid:
+;     ; void copy_grid(int *dest, int *src, int size)
+;     ; [esp+4] = dest                  
+;     ; [esp+8] = src
+;     ; [esp+12] = size
+;     push    ebp
+;     mov     ebp, esp
+
+;     ; copy arguments into temporaries: [ebp+8]=dest, [ebp+12]=src, [ebp+16]=size
+;     mov     eax, [ebp+8]   ; dest -> eax
+;     mov     edx, [ebp+12]  ; src  -> edx
+;     mov     ecx, [ebp+16]  ; size -> ecx
+
+;     ; preserve callee-saved registers we will use (ESI, EDI, EBX)
+;     ;push    ebx
+;     push    esi
+;     push    edi
+
+;     ; set ESI=src, EDI=dest for rep movsd (source in ESI, dest in EDI)
+;     mov     esi, edx
+;     mov     edi, eax
+
+;     ; number of dwords to copy = size * size
+;     imul    ecx, ecx
+;     cld
+;     rep movsd
+
+;     ; restore saved registers and return
+;     pop     edi
+;     pop     esi
+;     ;pop     ebx
+;     pop     ebp
+;     ret
+;     ; no need for additional stack frame locals
+
