@@ -1,7 +1,7 @@
 #include "cdecl.h"
 #include <stdio.h>
 #include <windows.h>
-#define SIZE 10 // assuming square grid
+#define SIZE 10 // assume square grid for simplicity
 #define MAX_GEN 20
 
 int PRE_CDECL count_neighbors(int *grid, int size, int r, int c) POST_CDECL;
@@ -16,11 +16,6 @@ void print_grid(int *g, int size) {
         putchar('\n');
     }
 }
-
-// void copy_grid(int *dest, int *src, int size) {
-//     for (int i = 0; i < size*size; i++)
-//         dest[i] = src[i];
-// }
 
 // how do I implement this in assembly?
 void next_gen(int *main_grid, int *buffer, int size)
@@ -42,6 +37,18 @@ void next_gen(int *main_grid, int *buffer, int size)
     }
     //copy buffer to main_grid
     copy_grid(main_grid, buffer, size);
+}
+
+int check_stability(int *tort,int *hare, int size){
+    int stable = 1;
+    for(int i = 0; i < size*size; i++){
+        if(tort[i] != hare[i]){
+            stable = 0;
+            break;
+        }
+    }
+
+    return stable;
 }
 
 int main(){
@@ -66,9 +73,13 @@ int main(){
 	int *hare = (int*)grid_B;
     int *buffer = (int*)buffer_grid;
 
+    copy_grid(hare, tort, SIZE); // hare starts same as tort
+
+    int stable = 0;
+    int gen = 1;
 
 	//game loop
-	for (int gen = 0; gen < MAX_GEN; ++gen) {
+	while(!stable) {
 		//system("cls");
 		printf("Generation %d\n", gen);
 
@@ -76,10 +87,13 @@ int main(){
 		printf("\n-----------------------\n\n"); // separator
 
 		next_gen(tort, buffer, SIZE);
-        // next_gen(hare, buffer, SIZE);
-        // next_gen(hare, buffer, SIZE);    // hare moves twice
+        next_gen(hare, buffer, SIZE);
+        next_gen(hare, buffer, SIZE);    // hare moves twice
+        //stable =  check_stability(tort, hare, SIZE);
 		Sleep(500);
+        gen++;
 	}
+    
 }
 
 
@@ -132,4 +146,8 @@ int main(){
 // 	return sum;
 // }
 
-	
+
+// void copy_grid(int *dest, int *src, int size) {
+//     for (int i = 0; i < size*size; i++)
+//         dest[i] = src[i];
+// }
