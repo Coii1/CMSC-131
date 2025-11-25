@@ -98,8 +98,7 @@ int main(void) {
     int *next; //= (int*)gridB;
 
 
-    /* Initialize with a random sparse pattern */
-    // for (int i = 0; i < ROWS * COLS; ++i) cur[i] = (rand() % 5 == 0) ? 1 : 0;
+     
 
     for (int gen = 0; gen < MAX_GEN; ++gen) {
         //system("cls"); /* use "clear" on Unix; on Windows "cls" */
