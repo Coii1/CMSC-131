@@ -50,16 +50,27 @@ int check_stability(int *tort,int *hare, int size){
 
     return stable;
 }
+// Returns: 0 = not homogeneous, 1 = all dead, 2 = all alive
+int check_homogeneity(int *grid, int size) {
+    int first = grid[0];
+    for(int i = 1; i < size*size; i++) {
+        if(grid[i] != first) {
+            return 0;  // not homogeneous
+        }
+    }
+    // All cells same as first
+    return (first == 0) ? 1 : 2;  // 1=all dead, 2=all alive
+}
 
 int main(){
 	int grid_A[SIZE][SIZE] = {
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+    {0, 0, 1, 1, 1, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
@@ -77,6 +88,7 @@ int main(){
 
     int stable = 0;
     int gen = 1;
+    int homogenous = 0;
 
 	//game loop
 	while(!stable) {
@@ -89,11 +101,21 @@ int main(){
 		next_gen(tort, buffer, SIZE);
         next_gen(hare, buffer, SIZE);
         next_gen(hare, buffer, SIZE);    // hare moves twice
-        //stable =  check_stability(tort, hare, SIZE);
-		Sleep(500);
+        stable =  check_stability(tort, hare, SIZE);
+        homogenous = check_homogeneity(tort, SIZE);
+		Sleep(300);
         gen++;
+
+        if(stable) {
+            printf("Pattern stabilized or entered a cycle at generation %d\n", gen);
+        }
+        if(homogenous == 1){
+            printf("All cells are dead at generation %d\n", gen);
+        }else if(homogenous == 2){
+            printf("All cells are alive at generation %d\n", gen);
+        }
+        
 	}
-    
 }
 
 
@@ -151,3 +173,55 @@ int main(){
 //     for (int i = 0; i < size*size; i++)
 //         dest[i] = src[i];
 // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //cross box
+    // {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+
+    //glider
+    // {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+    // {0, 0, 1, 1, 1, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+
+
+    //blinker
+    // {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 1, 1, 1, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
