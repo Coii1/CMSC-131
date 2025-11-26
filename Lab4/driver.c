@@ -47,9 +47,9 @@ int check_stability(int *tort,int *hare, int size){
             break;
         }
     }
-
     return stable;
 }
+
 // Returns: 0 = not homogeneous, 1 = all dead, 2 = all alive
 int check_homogeneity(int *grid, int size) {
     int first = grid[0];
@@ -76,15 +76,15 @@ void print_cycle(int *tort,int *hare, int *buffer, int size,int *gen){
 
 int main(){
 	int grid_A[SIZE][SIZE] = {
-    {0, 0, 1, 1, 0, 0, 0, 0, 0, 0},
-    {1, 0, 0, 1, 0, 0, 0, 0, 0, 0},
-    {1, 1, 0, 1, 0, 1, 1, 0, 0, 0},
-    {0, 1, 0, 1, 0, 0, 1, 0, 0, 0},
-    {0, 1, 0, 0, 0, 0, 1, 0, 1, 1},
-    {0, 0, 1, 1, 1, 0, 1, 0, 1, 1},
-    {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
+    {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	};
 	int grid_B[SIZE][SIZE] = {0}; 			//same sa taas
@@ -122,12 +122,7 @@ int main(){
 
         if(stable) {
             printf("Pattern stabilized or entered a cycle at generation %d\n\n", gen);
-            //next_gen(tort, buffer, SIZE);
-            //print_cycle(tort, hare, buffer, SIZE, g);
             print_cycle(tort, hare, buffer, SIZE, g);
-            //printf("Generation %d\n", gen);
-            //print_grid(tort, SIZE);
-            //print_grid(hare, SIZE);
             printf("\n----Cycle Continues----\n");
             printf("\n-----------------------\n\n"); // separator
 

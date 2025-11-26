@@ -7,101 +7,95 @@ segment .text
 ; int count_neighbors(int *grid, int SIZE, int r, int c)
 _count_neighbors:
     enter 4, 0                  ; reserve 4 bytes for sum -> [ebp-4] = sum
+    push    ebx
+    push    esi
+    push    edi
     mov dword [ebp-4], 0        ; sum = 0
-    ; mov dword [ebp-8], 0            ; nr
-    ; mov dword [ebp-12], 0           ; nc
-    ;[ebp] = old EBP
-    ;[ebp+4] = return address
-    mov esi, [ebp+8]     ; grid pointer
-    mov edi, [ebp+12]    ; SIZE
-    mov edx, [ebp+16]    ; r
-    mov ecx, [ebp+20]    ; c
+    mov esi, [ebp+8]            ; grid pointer
+    ; mov edx, [ebp+16]    ; r
+    ; mov ecx, [ebp+20]    ; c
+    mov ebx, [ebp+12]    ; SIZE in ebx
 
     mov eax, -1           ; dr = -1 diri and start sng outer loop from -1 to 1 nga offset
 row_loop:
     cmp eax, 1
     jg done
 
-    mov ebx, -1           ; dc = -1
+    mov edi, -1           ; dc = -1 for column loop
 column_loop:
-    cmp ebx, 1
+    cmp edi, 1
     jg next_row
 
-    ; skip center cell
-    cmp eax, 0                  ; if dr == 0 check if dc == 0, if true, skip, 
-    jne check_cell              ; if dr == 0 check if dc != 0 fall through sa check_cell
-    cmp ebx, 0                  ; if dr != 0 go to check_cell
-    je skip_cell
+    cmp eax, 0              ; if (dr == 0 
+    jne do_check            ; check out of bounds
+    cmp edi, 0              ; && dc == 0) continue;
+    je skip_cell_inc
 
-check_cell:
-    ; nr = r + dr ; edx = r + dr   
-    add edx, eax                    ; problem di is gina modify ang edx nga ga hold sng r
-    cmp edx, 0
-    jl  skip_cell_restore_r               ; if nr < 0, neighbor is off-grid → skip
-    cmp edx, edi                            ; compare nr >= SIZE
-    jge skip_cell_restore_r               ; jge kay out of bounds na if index SIZE
+do_check:
+    ; compute nr = r + dr into edx
+    mov edx, [ebp+16]
+    add edx, eax                   
+    cmp edx, 0                      ; if (nr < 0 
+    jl skip_cell_inc                ; || 
+    cmp edx, ebx                    ; nr >= size) 
+    jge skip_cell_inc               ; continue;
 
-    ; nc = c + dc = ecx
-    add ecx, ebx
-    cmp ecx, 0
-    jl skip_cell_restore_c               ; if nc < 0, neighbor is off-grid → skip
-    cmp ecx, edi                      ; compare nc >= SIZE
-    jge skip_cell_restore_c               ; jge kay out of bounds na if index SIZE
+    ; compute nc = c + dc into ecx
+    mov ecx, [ebp+20]               
+    add ecx, edi                    
+    cmp ecx, 0                      ; if (nc < 0 
+    jl skip_cell_inc                ; ||   
+    cmp ecx, ebx                    ; nc >= size) 
+    jge skip_cell_inc               ; continue;
 
-    ; compute index = nr*SIZE + nc  
-    ;add edx, eax           ; edx = nr
-    ;add ecx, ebx           ; ecx = nc
+    ; compute index = (nr * SIZE + nc) * 4 (byte offset)
+    imul edx, ebx        ; edx = nr * SIZE
+    add edx, ecx         ; edx += nc
+    shl edx, 2           ; multiply by 4 (sizeof int)
+    mov ecx, [esi + edx] ; load grid[nr][nc] into ecx
+    add [ebp-4], ecx     ; sum += value
 
-    ;nr * size
-    imul edx, edi         ; nr*SIZE
-    add edx, ecx          ; + nc
-    shl edx, 2            ; *4
-    mov edi, [esi + edx]  ; load value of grid[nr][nc] into register
-    add [ebp-4], edi      ; add to sum
-
-restore_b:
-    mov edi, [ebp+12]    ; SIZE (reload SIZE)
-
-skip_cell_restore_r:
-    mov edx, [ebp+16]    ; r (reload r)
-
-skip_cell_restore_c:
-    mov ecx, [ebp+20]    ; c (reload c)
-
-skip_cell:
-    inc     ebx
+skip_cell_inc:
+    inc edi
     jmp column_loop
 
 next_row:
-    inc     eax
+    inc eax
     jmp row_loop
 
 done:
-    mov     eax, [ebp-4]      ; return sum
+    mov eax, [ebp-4]      ; return sum
+    pop     edi
+    pop     esi
+    pop     ebx
     leave
     ret
-
 
 _copy_grid:
     ; void copy_grid(int *dest, int *src, int size)
     ; [esp+4] = dest                  
     ; [esp+8] = src
     ; [esp+12] = size
-    ; need ipreserve and esi, edi kay if inidi sila mabalik. ga runtime error
-    ;enter 0, 0                 ; no local variables
+    enter 0,0
+
+    ; arguments: [ebp+8]=dest, [ebp+12]=src, [ebp+16]=size
+    mov     eax, [ebp+8]   ; dest -> eax
+    mov     edx, [ebp+12]  ; src  -> edx
+    mov     ecx, [ebp+16]  ; size -> ecx
+
+    push    ebx
     push    esi
     push    edi
-    mov edi, [esp+12]  ; dest
-    mov esi, [esp+16]  ; src
-    mov ecx, [esp+20]  ; size
-    imul    ecx, ecx
+
+    mov     edi, eax       ; EDI = dest
+    mov     esi, edx       ; ESI = src
+    imul    ecx, ecx       ; ecx = size * size (number of dwords)
     cld
     rep movsd
     pop     edi
     pop     esi
-    ;leave
+    pop     ebx
+    leave
     ret
-    ;no need for stack frame since no local variables
-    
 
 
