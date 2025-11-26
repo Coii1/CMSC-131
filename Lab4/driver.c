@@ -62,6 +62,18 @@ int check_homogeneity(int *grid, int size) {
     return (first == 0) ? 1 : 2;  // 1=all dead, 2=all alive
 }
 
+void print_cycle(int *tort,int *hare, int *buffer, int size,int *gen){
+    do {
+        printf("Generation %d\n", *gen);
+		print_grid(tort, size);
+		printf("\n-----------------------\n"); // separator
+        next_gen(tort, buffer, size);
+        Sleep(300);
+        (*gen)++;
+    }while (!check_stability(tort, hare, size));  
+     
+}
+
 int main(){
 	int grid_A[SIZE][SIZE] = {
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -89,11 +101,15 @@ int main(){
     int stable = 0;
     int gen = 1;
     int homogenous = 0;
-    print_grid(tort, SIZE);
+    //print_grid(tort, SIZE);
+    int *g = &gen;
 
 	//game loop
 	while(!stable) {
 		//system("cls");
+        printf("Generation %d\n", gen);
+		print_grid(tort, SIZE);
+		printf("\n-----------------------\n\n"); // separator
 
 		next_gen(tort, buffer, SIZE);
         next_gen(hare, buffer, SIZE);
@@ -103,14 +119,18 @@ int main(){
 		Sleep(300);
         gen++;
 
-        printf("Generation %d\n", gen);
-		print_grid(tort, SIZE);
-		printf("\n-----------------------\n\n"); // separator
 
         if(stable) {
             printf("Pattern stabilized or entered a cycle at generation %d\n", gen);
-            next_gen(tort, buffer, SIZE);
-            print_grid(tort, SIZE);
+            //next_gen(tort, buffer, SIZE);
+            print_cycle(tort, hare, buffer, SIZE, g);
+            //printf("Generation %d\n", gen);
+            //print_grid(tort, SIZE);
+            //print_grid(hare, SIZE);
+            printf("\n----Cycle Continues----\n");
+            printf("\n-----------------------\n\n"); // separator
+
+            
         }
         if(homogenous == 1){
             printf("All cells are dead at generation %d\n", gen);
