@@ -8,6 +8,8 @@ segment .text
 _count_neighbors:
     enter 4, 0                  ; reserve 4 bytes for sum -> [ebp-4] = sum
     mov dword [ebp-4], 0        ; sum = 0
+    ; mov dword [ebp-8], 0            ; nr
+    ; mov dword [ebp-12], 0           ; nc
     ;[ebp] = old EBP
     ;[ebp+4] = return address
     mov esi, [ebp+8]     ; grid pointer
@@ -39,7 +41,7 @@ check_cell:
     cmp edx, edi                            ; compare nr >= SIZE
     jge skip_cell_restore_r               ; jge kay out of bounds na if index SIZE
 
-    ; nc = c + dc
+    ; nc = c + dc = ecx
     add ecx, ebx
     cmp ecx, 0
     jl skip_cell_restore_c               ; if nc < 0, neighbor is off-grid → skip
