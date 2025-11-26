@@ -3,6 +3,7 @@
 segment .text
     global _count_neighbors
     global _copy_grid
+    global _check_stability
 
 ; int count_neighbors(int *grid, int SIZE, int r, int c)
 _count_neighbors:
@@ -99,3 +100,39 @@ _copy_grid:
     ret
 
 
+_check_stability:
+    enter 0,0
+    push esi
+    push edi
+    push ebx
+
+    mov esi, [ebp+8]      ; tort pointer
+    mov edi, [ebp+12]     ; hare pointer
+    mov ecx, [ebp+16]     ; size
+
+    imul ecx, ecx     ; total elements = size*size
+    mov ebx, 1            ; stable = 1
+    xor edx, edx          ; i = 0
+
+.loop_start:
+    cmp edx, ecx
+    jge .done
+
+    mov eax, [esi + edx*4] ; tort[i]
+    cmp eax, [edi + edx*4] ; compare tort[i] with hare[i] without clobbering edi
+    je .next_element
+
+    mov ebx, 0
+    jmp .done
+
+.next_element:
+    inc edx
+    jmp .loop_start
+
+.done:
+    mov eax, ebx
+    pop ebx
+    pop edi
+    pop esi
+    leave
+    ret

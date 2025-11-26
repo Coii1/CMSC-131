@@ -6,6 +6,7 @@
 
 int PRE_CDECL count_neighbors(int *grid, int size, int r, int c) POST_CDECL;
 int PRE_CDECL copy_grid(int *dest, int *src, int size) POST_CDECL;
+int PRE_CDECL check_stability(int *tort, int *hare, int size) POST_CDECL;
 
 void print_grid(int *g, int size) {
     for (int r = 0; r < size; ++r) {
@@ -39,16 +40,6 @@ void next_gen(int *main_grid, int *buffer, int size)
     copy_grid(main_grid, buffer, size);
 }
 
-int check_stability(int *tort,int *hare, int size){
-    int stable = 1;
-    for(int i = 0; i < size*size; i++){
-        if(tort[i] != hare[i]){
-            stable = 0;
-            break;
-        }
-    }
-    return stable;
-}
 
 // Returns: 0 = not homogeneous, 1 = all dead, 2 = all alive
 int check_homogeneity(int *grid, int size) {
@@ -71,31 +62,31 @@ void print_cycle(int *tort,int *hare, int *buffer, int size,int *gen){
         Sleep(300);
         (*gen)++;
     }while (!check_stability(tort, hare, size));  
-     
+    
 }
 
 int main(){
-	int grid_A[SIZE][SIZE] = {
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    int grid_A[SIZE][SIZE] = {
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	};
-	int grid_B[SIZE][SIZE] = {0}; 			//same sa taas
-    int buffer_grid[SIZE][SIZE] = {0};
+};
+int grid_B[SIZE][SIZE] = {0}; 			//same sa taas
+int buffer_grid[SIZE][SIZE] = {0};
 
     //copy tort to hare
-
+    
 	int *tort = (int*)grid_A; // cast (2D &arr)        int (*)[size] into int*
 	int *hare = (int*)grid_B;
     int *buffer = (int*)buffer_grid;
-
+    
     copy_grid(hare, tort, SIZE); // hare starts same as tort
 
     int stable = 0;
@@ -103,14 +94,14 @@ int main(){
     int homogenous = 0;
     //print_grid(tort, SIZE);
     int *g = &gen;
-
+    
 	//game loop
 	while(!stable) {
-		//system("cls");
+        //system("cls");
         printf("Generation %d\n", gen);
 		print_grid(tort, SIZE);
 		printf("\n-----------------------\n\n"); // separator
-
+        
 		next_gen(tort, buffer, SIZE);
         next_gen(hare, buffer, SIZE);
         next_gen(hare, buffer, SIZE);    // hare moves twice
@@ -118,14 +109,14 @@ int main(){
         homogenous = check_homogeneity(tort, SIZE);
 		Sleep(300);
         gen++;
-
-
+        
+        
         if(stable) {
             printf("Pattern stabilized or entered a cycle at generation %d\n\n", gen);
             print_cycle(tort, hare, buffer, SIZE, g);
             printf("\n----Cycle Continues----\n");
             printf("\n-----------------------\n\n"); // separator
-
+            
             
         }
         if(homogenous == 1){
@@ -155,16 +146,26 @@ int main(){
 
 
 
+// int check_stability(int *tort,int *hare, int size){
+//     int stable = 1;
+//     for(int i = 0; i < size*size; i++){
+//         if(tort[i] != hare[i]){
+//             stable = 0;
+//             break;
+//         }
+//     }
+//     return stable;
+// }
 
 
 
 // int count_neighbors(int *grid, int size, int r, int c){
-// 	int sum = 0;
-
-// 	// Loop over all neighbor offsets: dr = -1..1, dc = -1..1
-// 	for (int dr = -1; dr <= 1; dr++) {
-// 		for (int dc = -1; dc <= 1; dc++) {
-
+    // 	int sum = 0;
+    
+    // 	// Loop over all neighbor offsets: dr = -1..1, dc = -1..1
+    // 	for (int dr = -1; dr <= 1; dr++) {
+        // 		for (int dc = -1; dc <= 1; dc++) {
+            
 // 			// Skip the cell itself
 // 			if (dr == 0 && dc == 0) continue;
 
