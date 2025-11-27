@@ -1,17 +1,18 @@
 #include "cdecl.h"
 #include <stdio.h>
 #include <windows.h>
-#define SIZE 10 // assume square grid for simplicity
+#define HEIGHT 10
+#define WIDTH 10
 #define MAX_GEN 20
 
-int PRE_CDECL count_neighbors(int *grid, int size, int r, int c) POST_CDECL;
-int PRE_CDECL copy_grid(int *dest, int *src, int size) POST_CDECL;
-int PRE_CDECL check_stability(int *tort, int *hare, int size) POST_CDECL;
+int PRE_CDECL count_neighbors(int *grid, int height, int width, int r, int c) POST_CDECL;
+int PRE_CDECL copy_grid(int *dest, int *src, int height, int width) POST_CDECL;
+int PRE_CDECL check_stability(int *tort, int *hare, int height, int width) POST_CDECL;
 
-void print_grid(int *g, int size) {
-    for (int r = 0; r < size; ++r) {
-        for (int c = 0; c < size; ++c) {
-            putchar(g[r * size + c] ? '#' : '-');
+void print_grid(int *g, int height, int width) {
+    for (int r = 0; r < height; ++r) {
+        for (int c = 0; c < width; ++c) {
+            putchar(g[r * width + c] ? '#' : '-');
             putchar(' ');
         }
         putchar('\n');
@@ -19,12 +20,14 @@ void print_grid(int *g, int size) {
 }
 
 // how do I implement this in assembly?
-void next_gen(int *main_grid, int *buffer, int size)
+void next_gen(int *main_grid, int height, int width)
 {
-    for (int r = 0; r < size; ++r) {
-        for (int c = 0; c < size; ++c) {
-            int alive = main_grid[r * size + c] ? 1 : 0;
-            int n = count_neighbors(main_grid, size, r, c); // ASM call
+    int buffer_grid[HEIGHT][WIDTH] = {0};
+    int *buffer = (int*)buffer_grid;
+    for (int r = 0; r < height; ++r) {
+        for (int c = 0; c < width; ++c) {
+            int alive = main_grid[r * width + c] ? 1 : 0;
+            int n = count_neighbors(main_grid, height, width, r, c); // ASM call
             int newcell = 0;
 			
             if (alive) {
@@ -33,18 +36,18 @@ void next_gen(int *main_grid, int *buffer, int size)
 				if (n == 3) newcell = 1;
             }
 			
-            buffer[r * size + c] = newcell;
+            buffer[r * width + c] = newcell;
         }
     }
     //copy buffer to main_grid
-    copy_grid(main_grid, buffer, size);
+    copy_grid(main_grid, buffer, height, width);
 }
 
 
 // Returns: 0 = not homogeneous, 1 = all dead, 2 = all alive
-int check_homogeneity(int *grid, int size) {
+int check_homogeneity(int *grid, int height, int width) {
     int first = grid[0];
-    for(int i = 1; i < size*size; i++) {
+    for(int i = 1; i < height*width; i++) {
         if(grid[i] != first) {
             return 0;  // not homogeneous
         }
@@ -53,20 +56,21 @@ int check_homogeneity(int *grid, int size) {
     return (first == 0) ? 1 : 2;  // 1=all dead, 2=all alive
 }
 
-void print_cycle(int *tort,int *hare, int *buffer, int size,int *gen){
+void print_cycle(int *tort, int *hare, int height, int width, int *gen){
     do {
         printf("Generation %d\n", *gen);
-		print_grid(tort, size);
-		printf("\n-----------------------\n"); // separator
-        next_gen(tort, buffer, size);
+		print_grid(tort, height, width);
+		printf("\n-----------------------\n\n"); // separator
+        next_gen(tort, height, width);
         Sleep(300);
         (*gen)++;
-    }while (!check_stability(tort, hare, size));  
+    }while (!check_stability(tort, hare, height, width));  
     
 }
 
 int main(){
-    int grid_A[SIZE][SIZE] = {
+    int grid_A[HEIGHT][WIDTH] = {
+        //Cross - Box
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
@@ -75,46 +79,60 @@ int main(){
         {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-};
-int grid_B[SIZE][SIZE] = {0}; 			//same sa taas
-int buffer_grid[SIZE][SIZE] = {0};
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+
+        // //  1-2-3
+        // {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        // {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        // {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
+        // {0, 0, 0, 1, 1, 0, 0, 0, 0, 0},
+        // {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+        // {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        // {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        // {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        // {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        // {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+
+
+    };
+    int grid_B[HEIGHT][WIDTH] = {0}; 			//same sa taas
+    
 
     //copy tort to hare
     
-	int *tort = (int*)grid_A; // cast (2D &arr)        int (*)[size] into int*
+	int *tort = (int*)grid_A; // cast (2D &arr)        int (*)[width] into int*
 	int *hare = (int*)grid_B;
-    int *buffer = (int*)buffer_grid;
     
-    copy_grid(hare, tort, SIZE); // hare starts same as tort
+    copy_grid(hare, tort, HEIGHT, WIDTH); // hare starts same as tort
 
     int stable = 0;
     int gen = 1;
     int homogenous = 0;
-    //print_grid(tort, SIZE);
+    //print_grid(tort, HEIGHT, WIDTH);
     int *g = &gen;
     
 	//game loop
 	while(!stable) {
         //system("cls");
         printf("Generation %d\n", gen);
-		print_grid(tort, SIZE);
+		print_grid(tort, HEIGHT, WIDTH);
 		printf("\n-----------------------\n\n"); // separator
         
-		next_gen(tort, buffer, SIZE);
-        next_gen(hare, buffer, SIZE);
-        next_gen(hare, buffer, SIZE);    // hare moves twice
-        stable =  check_stability(tort, hare, SIZE);
-        homogenous = check_homogeneity(tort, SIZE);
+		next_gen(tort, HEIGHT, WIDTH);
+        next_gen(hare, HEIGHT, WIDTH);
+        next_gen(hare, HEIGHT, WIDTH);    // hare moves twice
+        stable = check_stability(tort, hare, HEIGHT, WIDTH);
+        homogenous = check_homogeneity(tort, HEIGHT, WIDTH);
 		Sleep(300);
         gen++;
         
         
         if(stable) {
             printf("Pattern stabilized or entered a cycle at generation %d\n\n", gen);
-            print_cycle(tort, hare, buffer, SIZE, g);
-            printf("\n----Cycle Continues----\n");
+            print_cycle(tort, hare, HEIGHT, WIDTH, g);
+            print_cycle(tort, hare, HEIGHT, WIDTH, g);
+            printf("----Cycle Continues----\n");
             printf("\n-----------------------\n\n"); // separator
             
             
@@ -146,9 +164,9 @@ int buffer_grid[SIZE][SIZE] = {0};
 
 
 
-// int check_stability(int *tort,int *hare, int size){
+// int check_stability(int *tort,int *hare, int height, int width){
 //     int stable = 1;
-//     for(int i = 0; i < size*size; i++){
+//     for(int i = 0; i < height*width; i++){
 //         if(tort[i] != hare[i]){
 //             stable = 0;
 //             break;
@@ -159,7 +177,7 @@ int buffer_grid[SIZE][SIZE] = {0};
 
 
 
-// int count_neighbors(int *grid, int size, int r, int c){
+// int count_neighbors(int *grid, int height, int width, int r, int c){
     // 	int sum = 0;
     
     // 	// Loop over all neighbor offsets: dr = -1..1, dc = -1..1
@@ -173,12 +191,12 @@ int buffer_grid[SIZE][SIZE] = {0};
 // 			int nc = c + dc; // neighbor column
 
 // 			// Skip out-of-bounds neighbors
-// 			if (nr < 0 || nr >= size) continue;
-// 			if (nc < 0 || nc >= size) continue;
+// 			if (nr < 0 || nr >= height) continue;
+// 			if (nc < 0 || nc >= width) continue;
 			
 
 // 			// Convert 2D coordinates to 1D index
-// 			int index = nr * size + nc;
+// 			int index = nr * width + nc;
 
 // 			// Add neighbor value to sum
 // 			sum += grid[index];
@@ -189,8 +207,8 @@ int buffer_grid[SIZE][SIZE] = {0};
 // }
 
 
-// void copy_grid(int *dest, int *src, int size) {
-//     for (int i = 0; i < size*size; i++)
+// void copy_grid(int *dest, int *src, int height, int width) {
+//     for (int i = 0; i < height*width; i++)
 //         dest[i] = src[i];
 // }
 

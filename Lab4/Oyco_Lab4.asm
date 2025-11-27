@@ -5,7 +5,7 @@ segment .text
     global _copy_grid
     global _check_stability
 
-; int count_neighbors(int *grid, int SIZE, int r, int c)
+; int count_neighbors(int *grid, int height, int width, int r, int c)
 _count_neighbors:
     enter 4, 0                  ; reserve 4 bytes for sum -> [ebp-4] = sum
     push    ebx
@@ -13,9 +13,9 @@ _count_neighbors:
     push    edi
     mov dword [ebp-4], 0        ; sum = 0
     mov esi, [ebp+8]            ; grid pointer
-    ; mov edx, [ebp+16]    ; r
-    ; mov ecx, [ebp+20]    ; c
-    mov ebx, [ebp+12]    ; SIZE in ebx
+    ; mov edx, [ebp+20]    ; r
+    ; mov ecx, [ebp+24]    ; c
+    mov ebx, [ebp+16]    ; width in ebx
 
     mov eax, -1           ; dr = -1 diri and start sng outer loop from -1 to 1 nga offset
 row_loop:
@@ -34,23 +34,23 @@ column_loop:
 
 do_check:
     ; compute nr = r + dr into edx
-    mov edx, [ebp+16]
+    mov edx, [ebp+20]
     add edx, eax                   
     cmp edx, 0                      ; if (nr < 0 
     jl skip_cell_inc                ; || 
-    cmp edx, ebx                    ; nr >= size) 
+    cmp edx, [ebp+12]               ; nr >= height) 
     jge skip_cell_inc               ; continue;
 
     ; compute nc = c + dc into ecx
-    mov ecx, [ebp+20]               
+    mov ecx, [ebp+24]               
     add ecx, edi                    
     cmp ecx, 0                      ; if (nc < 0 
     jl skip_cell_inc                ; ||   
-    cmp ecx, ebx                    ; nc >= size) 
+    cmp ecx, ebx                    ; nc >= width) 
     jge skip_cell_inc               ; continue;
 
-    ; compute index = (nr * SIZE + nc) * 4 (byte offset)
-    imul edx, ebx        ; edx = nr * SIZE
+    ; compute index = (nr * width + nc) * 4 (byte offset)
+    imul edx, ebx        ; edx = nr * width
     add edx, ecx         ; edx += nc
     shl edx, 2           ; multiply by 4 (sizeof int)
     mov ecx, [esi + edx] ; load grid[nr][nc] into ecx
@@ -73,16 +73,17 @@ done:
     ret
 
 _copy_grid:
-    ; void copy_grid(int *dest, int *src, int size)
+    ; void copy_grid(int *dest, int *src, int height, int width)
     ; [esp+4] = dest                  
     ; [esp+8] = src
-    ; [esp+12] = size
+    ; [esp+12] = height
+    ; [esp+16] = width
     enter 0,0
 
-    ; arguments: [ebp+8]=dest, [ebp+12]=src, [ebp+16]=size
+    ; arguments: [ebp+8]=dest, [ebp+12]=src, [ebp+16]=height, [ebp+20]=width
     mov     eax, [ebp+8]   ; dest -> eax
     mov     edx, [ebp+12]  ; src  -> edx
-    mov     ecx, [ebp+16]  ; size -> ecx
+    mov     ecx, [ebp+16]  ; height -> ecx
 
     push    ebx
     push    esi
@@ -90,7 +91,7 @@ _copy_grid:
 
     mov     edi, eax       ; EDI = dest
     mov     esi, edx       ; ESI = src
-    imul    ecx, ecx       ; ecx = size * size (number of dwords)
+    imul    ecx, [ebp+20]  ; ecx = height * width (number of dwords)
     cld
     rep movsd
     pop     edi
@@ -101,6 +102,7 @@ _copy_grid:
 
 
 _check_stability:
+    ; int check_stability(int *tort, int *hare, int height, int width)
     enter 0,0
     push esi
     push edi
@@ -108,9 +110,9 @@ _check_stability:
 
     mov esi, [ebp+8]      ; tort pointer
     mov edi, [ebp+12]     ; hare pointer
-    mov ecx, [ebp+16]     ; size
+    mov ecx, [ebp+16]     ; height
 
-    imul ecx, ecx     ; total elements = size*size
+    imul ecx, [ebp+20]    ; total elements = height*width
     mov ebx, 1            ; stable = 1
     xor edx, edx          ; i = 0
 
