@@ -5,14 +5,14 @@ segment .text
     global _copy_grid
     global _check_stability
 
-; int count_neighbors(int *grid, int height, int width, int r, int c)
+; int count_neighbors(int grid[HEIGHT][WIDTH], int height, int width, int r, int c)
 _count_neighbors:
     enter 4, 0                  ; reserve 4 bytes for sum -> [ebp-4] = sum
     push    ebx
     push    esi
     push    edi
     mov dword [ebp-4], 0        ; sum = 0
-    mov esi, [ebp+8]            ; grid pointer
+    mov esi, [ebp+8]            ; grid pointer (2D array decays to pointer)
     ; mov edx, [ebp+20]    ; r
     ; mov ecx, [ebp+24]    ; c
     mov ebx, [ebp+16]    ; width in ebx
@@ -73,9 +73,9 @@ done:
     ret
 
 _copy_grid:
-    ; void copy_grid(int *dest, int *src, int height, int width)
-    ; [esp+4] = dest                  
-    ; [esp+8] = src
+    ; void copy_grid(int dest[HEIGHT][WIDTH], int src[HEIGHT][WIDTH], int height, int width)
+    ; [esp+4] = dest (2D array decays to pointer)                 
+    ; [esp+8] = src (2D array decays to pointer)
     ; [esp+12] = height
     ; [esp+16] = width
     enter 0,0
@@ -102,14 +102,14 @@ _copy_grid:
 
 
 _check_stability:
-    ; int check_stability(int *tort, int *hare, int height, int width)
+    ; int check_stability(int tort[HEIGHT][WIDTH], int hare[HEIGHT][WIDTH], int height, int width)
     enter 0,0
     push esi
     push edi
     push ebx
 
-    mov esi, [ebp+8]      ; tort pointer
-    mov edi, [ebp+12]     ; hare pointer
+    mov esi, [ebp+8]      ; tort pointer (2D array decays to pointer)
+    mov edi, [ebp+12]     ; hare pointer (2D array decays to pointer)
     mov ecx, [ebp+16]     ; height
 
     imul ecx, [ebp+20]    ; total elements = height*width
